@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <style>
+        /* body {
+            margin: 0;
+            background: #f4f4f4;
+        }
+        nav {
+            background: rgb(98, 72, 98);
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        button {
+            padding: 8px 15px;
+            cursor: pointer;
+        }
+        .container {
+            padding: 20px;
+        }
+        .cards {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: space-evenly;
+        }
+        .count-card {
+            width: 220px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .students {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 30px;
+        }
+        .student-card {
+            width: 220px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .details {
+            background: white;
+            padding: 20px;
+            margin-top: 30px;
+            border-radius: 10px;
+        } */
+        :root {
+            --bg-color:aliceblue;
+            --text-color: black;
+            --nav-color: gray;
+            --card-color: white;
+            --button-color: green;
+            --button-text: white;
+            --shadow: 0 0 5px gray;
+        }
+        .dark-theme {
+            --bg-color: rgb(29, 28, 28);
+            --text-color: white;
+            --nav-color:balck;
+            --card-color:grey;
+            --button-color:rgb(102, 155, 153);
+            --button-text: black;
+            --shadow: 0 0 10px rgb(133, 131, 131);
+        }
+        body {
+            margin: 0;
+            background: var(--bg-color);
+            color: var(--text-color);
+            transition: 0.3s;
+        }
+        nav {
+            background: var(--nav-color);
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background: var(--button-color);
+            color: var(--button-text);
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        button:hover {
+            opacity: 0.8;
+        }
+        .container {
+            padding: 20px;
+        }
+        .cards {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .count-card {
+            width: 220px;
+            background: var(--card-color);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            transition: 0.3s;
+        }
+        .students {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 30px;
+        }
+        .student-card {
+            width: 220px;
+            background: var(--card-color);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            transition: 0.3s;
+        }
+        .details {
+            background: var(--card-color);
+            padding: 20px;
+            margin-top: 30px;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            transition: 0.3s;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <h2>Welcome <span id="user"></span></h2>
+        <!-- <button onclick="goAttendance()">Take Attendance</button> -->
+
+        <button onclick="toggleTheme()"> Change Theme
+
+        </button>
+
+        <button onclick="goAttendance()">
+
+            Take Attendance
+
+        </button>
+    </nav>
+    <div class="container">
+        <div class="cards">
+            <div class="count-card">
+                <h2>Total Students</h2>
+                <h1 id="totalstudents">0</h1>
+            </div>
+            <div class="count-card">
+                <h2>Present Students</h2>
+                <h1 id="presentstudents">0</h1>
+            </div>
+            <div class="count-card">
+                <h2>Absent Students</h2>
+                <h1 id="absentstudents">0</h1>
+            </div>
+        </div>
+        <div class="students" id="students"></div>
+        <div class="details" id="details">
+            <h2>Student Details</h2>
+            <p>Click Display Details</p>
+        </div>
+    </div>
+    <script>
+        document.getElementById("user").innerText = sessionStorage.getItem("username");
+        let students = [];
+        let attendanceData = JSON.parse(localStorage.getItem("attendance"))
+            || {};
+        fetch("students.json")
+            .then((response) => {
+                return response.json();
+            })
+            .then((data) => {
+                students = data;
+                displayStudents();
+                updateCounts();
+            });
+        function displayStudents() {
+            const container = document.getElementById("students");
+            container.innerHTML = "";
+            students.forEach((student) => {
+                let status =
+                    attendanceData[student.id]
+                    || "Absent";
+                container.innerHTML += `
+                    <div class="student-card">
+                        <h3>${student.name}</h3>
+                        <button onclick="showDetails(${student.id})"> Display Details</button> </div>
+                           `;
+            });
+
+        }
+        function updateCounts() {
+            document.getElementById("totalstudents").innerText = students.length;
+            let present = 0;
+            let absent = 0;
+            students.forEach((student) => {
+                let status =
+                    attendanceData[student.id]
+                    || "Absent";
+                if (status === "Present") {
+                    present++;
+                }
+                else {
+                    absent++;
+                }
+            });
+            document.getElementById("presentstudents").innerText = present;
+            document.getElementById("absentstudents").innerText = absent;
+
+        }
+        function showDetails(id) {
+            const student = students.find(s => s.id === id);
+            document.getElementById("details").innerHTML = `
+                <h1>Student details</h1>
+                <h2>${student.name}</h2>
+                <h3>ID : ${student.id}</h3>
+                <h3>Phone :${student.phone}</h3>
+                <h3>Class :${student.class}</h3>
+            `;
+        }
+        function goAttendance() {
+            window.location.href = "attendance.html";
+        }
+        if (localStorage.getItem("theme") === "dark") {
+            document.body.classList.add("dark-theme");
+        }
+        function toggleTheme() {
+            document.body.classList.toggle("dark-theme");
+            if (document.body.classList.contains("dark-theme")) {
+                localStorage.setItem("theme", "dark");
+            }
+            else {
+                localStorage.setItem("theme", "light");
+            }
+        }
+    </script>
+</body>
+
+</html>
