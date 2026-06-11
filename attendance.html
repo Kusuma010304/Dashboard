@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance</title>
+    <style>
+        body {
+            margin: 0;
+            background: #f4f4f4;
+        }
+
+        nav {
+            background: #52334b;
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        button {
+            padding: 8px 15px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+        }
+
+        .container {
+            padding: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            box-shadow: 0 0 5px gray;
+        }
+
+        th {
+            background: #333;
+            color: white;
+        }
+
+        th,
+        td {
+            border: 1px solid gray;
+            padding: 15px;
+            text-align: center;
+        }
+
+        select {
+            padding: 5px;
+            width: 120px;
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <h2></h2>Attendance Page </h2>
+        <button onclick="goDashboard()">Dashboard</button>
+    </nav>
+    <div class="container">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Attendance</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+    </div>
+    <script>
+        let students = [];
+        let attendanceData = JSON.parse(localStorage.getItem("attendance")) || {};
+        fetch("students.json")
+            .then((response) => {
+                return response.json();
+            })
+            .then((data) => {
+                students = data;
+                console.log(students);
+                displayAttendance();
+            })
+            .catch((error) => {
+                console.log("Error :", error);
+            });
+        function displayAttendance() {
+            const body = document.getElementById("tableBody");
+            body.innerHTML = "";
+            students.forEach((student) => {
+                let status = attendanceData[student.id]
+                    || "Absent";
+                body.innerHTML += `
+                   <tr>
+                     <td>${student.id} </td>
+                      <td> ${student.name}</td>
+                      <td>
+                            <select onchange="updateAttendance(${student.id},this.value)">
+ <option value="Present" ${status === "Present" ? "selected" : ""}> Present</option>
+<option value="Absent" ${status === "Absent" ? "selected" : ""}>Absent</option>
+ </select>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+        function updateAttendance(id, value) {
+            attendanceData[id] = value;
+            localStorage.setItem(
+                "attendance",
+                JSON.stringify(attendanceData)
+            );
+        }
+        function goDashboard() {
+            window.location.href =
+                "dashboard.html";
+        }
+    </script>
+</body>
+</html>
